@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialHub - Connect & Share</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-comments"></i>
+                <span>SocialHub</span>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search posts..." id="searchInput">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <div class="user-actions">
+                <button class="btn-primary" id="loginBtn">Login</button>
+                <button class="btn-secondary" id="signupBtn">Sign Up</button>
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <span id="username"></span>
+                    <button id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="create-post-card">
+                    <button class="create-post-btn" id="createPostBtn">
+                        <i class="fas fa-plus"></i>
+                        Create Post
+                    </button>
+                </div>
+                <div class="community-info">
+                    <h3>Popular Communities</h3>
+                    <ul>
+                        <li><i class="fas fa-fire"></i> Trending</li>
+                        <li><i class="fas fa-gamepad"></i> Gaming</li>
+                        <li><i class="fas fa-code"></i> Programming</li>
+                        <li><i class="fas fa-music"></i> Music</li>
+                        <li><i class="fas fa-film"></i> Movies</li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Posts Feed -->
+            <section class="posts-feed">
+                <div class="sort-options">
+                    <button class="sort-btn active" data-sort="hot">Hot</button>
+                    <button class="sort-btn" data-sort="new">New</button>
+                    <button class="sort-btn" data-sort="top">Top</button>
+                </div>
+                <div id="postsContainer">
+                    <!-- Posts will be dynamically loaded here -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close" id="closeLogin">&times;</span>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="text" id="loginUsername" placeholder="Username" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <p>Don't have an account? <a href="#" id="switchToSignup">Sign up</a></p>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div class="modal" id="signupModal">
+        <div class="modal-content">
+            <span class="close" id="closeSignup">&times;</span>
+            <h2>Sign Up</h2>
+            <form id="signupForm">
+                <input type="text" id="signupUsername" placeholder="Username" required>
+                <input type="email" id="signupEmail" placeholder="Email" required>
+                <input type="password" id="signupPassword" placeholder="Password" required>
+                <button type="submit">Sign Up</button>
+            </form>
+            <p>Already have an account? <a href="#" id="switchToLogin">Login</a></p>
+        </div>
+    </div>
+
+    <!-- Create Post Modal -->
+    <div class="modal" id="createPostModal">
+        <div class="modal-content">
+            <span class="close" id="closeCreatePost">&times;</span>
+            <h2>Create a Post</h2>
+            <form id="createPostForm">
+                <input type="text" id="postTitle" placeholder="Post Title" required>
+                <textarea id="postContent" placeholder="What's on your mind?"></textarea>
+                
+                <!-- Media Upload Section -->
+                <div class="media-upload-section">
+                    <h3>Add Media</h3>
+                    <div class="media-options">
+                        <button type="button" class="media-btn" id="photoBtn">
+                            <i class="fas fa-image"></i> Photo
+                        </button>
+                        <button type="button" class="media-btn" id="videoBtn">
+                            <i class="fas fa-video"></i> Video
+                        </button>
+                        <button type="button" class="media-btn" id="audioBtn">
+                            <i class="fas fa-microphone"></i> Record Audio
+                        </button>
+                        <button type="button" class="media-btn" id="audioFileBtn">
+                            <i class="fas fa-music"></i> Audio File
+                        </button>
+                    </div>
+                    
+                    <!-- File inputs (hidden) -->
+                    <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                    <input type="file" id="videoInput" accept="video/*" style="display: none;">
+                    <input type="file" id="audioFileInput" accept="audio/*" style="display: none;">
+                    
+                    <!-- Audio Recording Section -->
+                    <div class="audio-recording" id="audioRecording" style="display: none;">
+                        <div class="recording-controls">
+                            <button type="button" id="startRecording" class="record-btn">
+                                <i class="fas fa-circle"></i> Start Recording
+                            </button>
+                            <button type="button" id="stopRecording" class="record-btn" style="display: none;">
+                                <i class="fas fa-stop"></i> Stop Recording
+                            </button>
+                            <span id="recordingTime">00:00</span>
+                        </div>
+                        <audio id="audioPlayback" controls style="display: none; width: 100%; margin-top: 10px;"></audio>
+                    </div>
+                    
+                    <!-- Media Preview -->
+                    <div class="media-preview" id="mediaPreview"></div>
+                </div>
+                
+                <div class="post-actions">
+                    <button type="submit" class="btn-primary">Post</button>
+                    <button type="button" class="btn-secondary" id="cancelPost">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Suspension Warning Modal -->
+    <div class="modal" id="suspensionModal">
+        <div class="modal-content warning">
+            <h2><i class="fas fa-exclamation-triangle"></i> Content Warning</h2>
+            <p id="suspensionMessage"></p>
+            <button class="btn-primary" id="closeSuspension">Understood</button>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner" style="display: none;">
+        <div class="spinner"></div>
+        <p>Checking content...</p>
+    </div>
+
+    <!-- Gradio Client Script -->
+    <script type="module">
+        import { Client } from "https://cdn.skypack.dev/@gradio/client";
+        
+        // Global variables
+        let currentUser = null;
+        let posts = [];
+        let users = {};
+        let userViolations = {};
+        let gradioClient = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordingInterval = null;
+        let recordingStartTime = null;
+        let currentMediaFile = null;
+        let currentMediaType = null;
+
+        // Hugging Face API configuration
+        const HF_API_TOKEN = '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';
+        const GRADIO_SPACE_URL = 'EmmanuelJoshua/secondtanglish';
+
+        // Initialize Gradio client
+        async function initializeGradioClient() {
+            try {
+                console.log('Connecting to Gradio client...');
+                gradioClient = await Client.connect(GRADIO_SPACE_URL, {
+                    hf_token: HF_API_TOKEN
+                });
+                console.log('Gradio client connected successfully');
+                return true;
+            } catch (error) {
+                console.error('Error connecting to Gradio client:', error);
+                return false;
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initializeGradioClient();
+            initializeApp();
+            loadSampleData();
+            displayPosts();
+        });
+
+        function initializeApp() {
+            // Load user data from localStorage
+            const savedUsers = localStorage.getItem('socialHubUsers');
+            const savedCurrentUser = localStorage.getItem('socialHubCurrentUser');
+            const savedPosts = localStorage.getItem('socialHubPosts');
+            const savedViolations = localStorage.getItem('socialHubViolations');
+
+            if (savedUsers) users = JSON.parse(savedUsers);
+            if (savedCurrentUser) {
+                currentUser = JSON.parse(savedCurrentUser);
+                updateUIForLoggedInUser();
+            }
+            if (savedPosts) posts = JSON.parse(savedPosts);
+            if (savedViolations) userViolations = JSON.parse(savedViolations);
+
+            // Event listeners
+            setupEventListeners();
+        }
+        
+
+        function setupEventListeners() {
+            // Modal controls
+            document.getElementById('loginBtn').addEventListener('click', () => showModal('loginModal'));
+            document.getElementById('signupBtn').addEventListener('click', () => showModal('signupModal'));
+            document.getElementById('createPostBtn').addEventListener('click', () => {
+                if (!currentUser) {
+                    showModal('loginModal');
+                    return;
+                }
+                showModal('createPostModal');
+            });
+
+            // Close modal buttons
+            document.querySelectorAll('.close').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const modal = e.target.closest('.modal');
+                    hideModal(modal.id);
+                });
+            });
+
+            // Form submissions
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('signupForm').addEventListener('submit', handleSignup);
+            document.getElementById('createPostForm').addEventListener('submit', handleCreatePost);
+
+            // Modal switching
+            document.getElementById('switchToSignup').addEventListener('click', () => {
+                hideModal('loginModal');
+                showModal('signupModal');
+            });
+            document.getElementById('switchToLogin').addEventListener('click', () => {
+                hideModal('signupModal');
+                showModal('loginModal');
+            });
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
+            // Cancel post
+            document.getElementById('cancelPost').addEventListener('click', () => {
+                hideModal('createPostModal');
+                resetCreatePostForm();
+            });
+
+            // Media upload event listeners
+            setupMediaEventListeners();
+
+            // Close suspension modal
+            document.getElementById('closeSuspension').addEventListener('click', () => {
+                hideModal('suspensionModal');
+            });
+
+            // Sort buttons
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    // In a real app, this would sort posts
+                });
+            });
+
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', handleSearch);
+        }
+
+        function setupMediaEventListeners() {
+            // Photo upload
+            document.getElementById('photoBtn').addEventListener('click', () => {
+                document.getElementById('photoInput').click();
+            });
+            
+            document.getElementById('photoInput').addEventListener('change', handleFileUpload);
+
+            // Video upload
+            document.getElementById('videoBtn').addEventListener('click', () => {
+                document.getElementById('videoInput').click();
+            });
+            
+            document.getElementById('videoInput').addEventListener('change', handleFileUpload);
+
+            // Audio file upload
+            document.getElementById('audioFileBtn').addEventListener('click', () => {
+                document.getElementById('audioFileInput').click();
+            });
+            
+            document.getElementById('audioFileInput').addEventListener('change', handleFileUpload);
+
+            // Audio recording
+            document.getElementById('audioBtn').addEventListener('click', toggleAudioRecording);
+            document.getElementById('startRecording').addEventListener('click', startAudioRecording);
+            document.getElementById('stopRecording').addEventListener('click', stopAudioRecording);
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file size (max 50MB)
+            const maxSize = 50 * 1024 * 1024;
+            if (file.size > maxSize) {
+                showAlert('File size must be less than 50MB', 'error');
+                return;
+            }
+
+            // Validate file type
+            const fileType = file.type.split('/')[0];
+            if (!['image', 'video', 'audio'].includes(fileType)) {
+                showAlert('Invalid file type. Please select an image, video, or audio file.', 'error');
+                return;
+            }
+
+            currentMediaFile = file;
+            currentMediaType = fileType;
+            
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                displayMediaPreview(e.target.result, fileType, file.name);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function toggleAudioRecording() {
+            const recordingSection = document.getElementById('audioRecording');
+            recordingSection.style.display = recordingSection.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function startAudioRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = function(event) {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = function() {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    
+                    // Create a file object from the blob
+                    currentMediaFile = new File([audioBlob], `recording_${Date.now()}.wav`, { type: 'audio/wav' });
+                    currentMediaType = 'audio';
+                    
+                    // Show audio playback
+                    const audioPlayback = document.getElementById('audioPlayback');
+                    audioPlayback.src = audioUrl;
+                    audioPlayback.style.display = 'block';
+                    
+                    displayMediaPreview(audioUrl, 'audio', currentMediaFile.name);
+                    
+                    // Stop all tracks
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                
+                mediaRecorder.start();
+                recordingStartTime = Date.now();
+                
+                // Update UI
+                document.getElementById('startRecording').style.display = 'none';
+                document.getElementById('stopRecording').style.display = 'inline-block';
+                
+                // Start timer
+                recordingInterval = setInterval(updateRecordingTime, 1000);
+                
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                showAlert('Error accessing microphone. Please check permissions.', 'error');
+            }
+        }
+
+        function stopAudioRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                
+                // Update UI
+                document.getElementById('startRecording').style.display = 'inline-block';
+                document.getElementById('stopRecording').style.display = 'none';
+                
+                // Stop timer
+                clearInterval(recordingInterval);
+                document.getElementById('recordingTime').textContent = '00:00';
+            }
+        }
+
+        function updateRecordingTime() {
+            if (recordingStartTime) {
+                const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+                const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                const seconds = (elapsed % 60).toString().padStart(2, '0');
+                document.getElementById('recordingTime').textContent = `${minutes}:${seconds}`;
+            }
+        }
+
+        function displayMediaPreview(src, type, filename) {
+            const preview = document.getElementById('mediaPreview');
+            let previewHTML = '';
+            
+            switch(type) {
+                case 'image':
+                    previewHTML = `
+                        <div class="media-item">
+                            <img src="${src}" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: 4px;">
+                            <div class="media-info">
+                                <span class="filename">${filename}</span>
+                                <button type="button" class="remove-media" onclick="removeMedia()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'video':
+                    previewHTML = `
+                        <div class="media-item">
+                            <video src="${src}" controls style="max-width: 100%; max-height: 200px; border-radius: 4px;"></video>
+                            <div class="media-info">
+                                <span class="filename">${filename}</span>
+                                <button type="button" class="remove-media" onclick="removeMedia()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'audio':
+                    previewHTML = `
+                        <div class="media-item">
+                            <div class="audio-preview">
+                                <i class="fas fa-music"></i>
+                                <audio src="${src}" controls style="width: 100%;"></audio>
+                            </div>
+                            <div class="media-info">
+                                <span class="filename">${filename}</span>
+                                <button type="button" class="remove-media" onclick="removeMedia()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            preview.innerHTML = previewHTML;
+            preview.style.display = 'block';
+        }
+
+        function removeMedia() {
+            currentMediaFile = null;
+            currentMediaType = null;
+            document.getElementById('mediaPreview').innerHTML = '';
+            document.getElementById('mediaPreview').style.display = 'none';
+            
+            // Reset file inputs
+            document.getElementById('photoInput').value = '';
+            document.getElementById('videoInput').value = '';
+            document.getElementById('audioFileInput').value = '';
+            
+            // Hide audio recording section
+            document.getElementById('audioRecording').style.display = 'none';
+            document.getElementById('audioPlayback').style.display = 'none';
+        }
+
+        function resetCreatePostForm() {
+            document.getElementById('createPostForm').reset();
+            removeMedia();
+        }
+
+        // Media modal for full-screen view
+        function openMediaModal(src, type) {
+            const modal = document.createElement('div');
+            modal.className = 'media-modal';
+            modal.onclick = () => modal.remove();
+            
+            let content = '';
+            if (type === 'image') {
+                content = `<img src="${src}" style="max-width: 90vw; max-height: 90vh; object-fit: contain;">`;
+            }
+            
+            modal.innerHTML = `
+                <div class="media-modal-content" onclick="event.stopPropagation()">
+                    ${content}
+                    <button class="close-media-modal" onclick="this.closest('.media-modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        // Make functions globally accessible
+        window.removeMedia = removeMedia;
+        window.openMediaModal = openMediaModal;
+
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (users[username] && users[username].password === password) {
+                if (users[username].suspended) {
+                    showAlert('Your account has been suspended due to repeated violations.', 'error');
+                    return;
+                }
+                
+                currentUser = users[username];
+                localStorage.setItem('socialHubCurrentUser', JSON.stringify(currentUser));
+                updateUIForLoggedInUser();
+                hideModal('loginModal');
+                document.getElementById('loginForm').reset();
+                showAlert('Welcome back, ' + currentUser.username + '!', 'success');
+            } else {
+                showAlert('Invalid username or password', 'error');
+            }
+        }
+
+        function handleSignup(e) {
+            e.preventDefault();
+            const username = document.getElementById('signupUsername').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            if (users[username]) {
+                showAlert('Username already exists', 'error');
+                return;
+            }
+
+            const newUser = {
+                username: username,
+                email: email,
+                password: password,
+                joinDate: new Date().toISOString(),
+                suspended: false
+            };
+
+            users[username] = newUser;
+            userViolations[username] = 0;
+            localStorage.setItem('socialHubUsers', JSON.stringify(users));
+            localStorage.setItem('socialHubViolations', JSON.stringify(userViolations));
+
+            currentUser = newUser;
+            localStorage.setItem('socialHubCurrentUser', JSON.stringify(currentUser));
+            updateUIForLoggedInUser();
+            hideModal('signupModal');
+            document.getElementById('signupForm').reset();
+            showAlert('Account created successfully! Welcome to SocialHub!', 'success');
+        }
+
+        function updateUIForLoggedInUser() {
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('signupBtn').style.display = 'none';
+            document.getElementById('userMenu').style.display = 'flex';
+            document.getElementById('username').textContent = currentUser.username;
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('socialHubCurrentUser');
+            document.getElementById('loginBtn').style.display = 'block';
+            document.getElementById('signupBtn').style.display = 'block';
+            document.getElementById('userMenu').style.display = 'none';
+            showAlert('Logged out successfully', 'success');
+        }
+
+        async function handleCreatePost(e) {
+            e.preventDefault();
+            
+            if (!currentUser) {
+                showAlert('Please log in to create a post', 'error');
+                return;
+            }
+
+            if (currentUser.suspended) {
+                showSuspensionModal('Your account is suspended. You cannot create posts.');
+                return;
+            }
+
+            const title = document.getElementById('postTitle').value;
+            const content = document.getElementById('postContent').value;
+
+            // Validate that either content or media is provided
+            if (!title.trim()) {
+                showAlert('Please enter a post title', 'error');
+                return;
+            }
+
+            if (!content.trim() && !currentMediaFile) {
+                showAlert('Please enter some content or add media to your post', 'error');
+                return;
+            }
+
+            // Show loading spinner
+            document.getElementById('loadingSpinner').style.display = 'flex';
+
+            try {
+                // Check for hate speech in title and content using Gradio client
+                const titleCheck = await checkHateSpeechGradio(title);
+                let contentCheck = { isOffensive: false };
+                
+                if (content.trim()) {
+                    contentCheck = await checkHateSpeechGradio(content);
+                }
+
+                // Hide loading spinner
+                document.getElementById('loadingSpinner').style.display = 'none';
+
+                if (titleCheck.isOffensive || contentCheck.isOffensive) {
+                    handleViolation(currentUser.username, 'post');
+                    return;
+                }
+
+                // Show success message for non-offensive content
+                console.log('Content passed hate speech check:', { titleCheck, contentCheck });
+
+                // Prepare media data
+                let mediaData = null;
+                if (currentMediaFile) {
+                    const reader = new FileReader();
+                    mediaData = await new Promise((resolve) => {
+                        reader.onload = function(e) {
+                            resolve({
+                                type: currentMediaType,
+                                data: e.target.result,
+                                filename: currentMediaFile.name,
+                                size: currentMediaFile.size
+                            });
+                        };
+                        reader.readAsDataURL(currentMediaFile);
+                    });
+                }
+
+                // Create the post
+                const newPost = {
+                    id: Date.now(),
+                    title: title,
+                    content: content || '',
+                    author: currentUser.username,
+                    timestamp: new Date().toISOString(),
+                    upvotes: 0,
+                    downvotes: 0,
+                    comments: [],
+                    userVotes: {},
+                    media: mediaData
+                };
+
+                posts.unshift(newPost);
+                localStorage.setItem('socialHubPosts', JSON.stringify(posts));
+                
+                hideModal('createPostModal');
+                resetCreatePostForm();
+                displayPosts();
+                showAlert('Post created successfully!', 'success');
+
+            } catch (error) {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                console.error('Error checking hate speech:', error);
+                showAlert('Error processing your post. Please try again.', 'error');
+            }
+        }
+
+        async function checkHateSpeechGradio(text) {
+            try {
+                if (!gradioClient) {
+                    console.log('Gradio client not available, attempting to reconnect...');
+                    const connected = await initializeGradioClient();
+                    if (!connected) {
+                        throw new Error('Failed to connect to Gradio client');
+                    }
+                }
+
+                console.log('Checking text with Gradio client:', text);
+                
+                const result = await gradioClient.predict("/predict_text", { 
+                    text: text 
+                });
+
+                console.log('Gradio Response:', result);
+
+                // Parse the response according to the API specification
+                // Returns list of 2 elements: [prediction, confidence]
+                const prediction = result.data[0]; // The prediction (e.g., "OFFENSIVE" or "NOT_OFFENSIVE")
+                const confidence = result.data[1]; // The confidence score
+
+                console.log('Parsed result:', { prediction, confidence });
+
+                // Determine if content is offensive
+                let isOffensive = false;
+                if (prediction && typeof prediction === 'string') {
+                    const predictionLower = prediction.toLowerCase();
+                    // Only mark as offensive if the prediction explicitly indicates offensive content
+                    isOffensive = predictionLower.includes('offensive') && 
+                                 !predictionLower.includes('not_offensive') &&
+                                 !predictionLower.includes('not offensive');
+                }
+
+                // Parse confidence as number
+                let confidenceScore = 0.0;
+                if (confidence !== undefined && confidence !== null) {
+                    confidenceScore = parseFloat(confidence) || 0.0;
+                }
+
+                return {
+                    isOffensive: isOffensive,
+                    prediction: prediction,
+                    confidence: confidenceScore
+                };
+
+            } catch (error) {
+                console.error('Error calling Gradio API:', error);
+                
+                // Fallback to local detection if Gradio fails
+                console.log('Falling back to local detection');
+                return simulateHateSpeechDetection(text);
+            }
+        }
+
+        // Fallback function for when Gradio API is not available
+        function simulateHateSpeechDetection(text) {
+            console.log('Using simulated hate speech detection for:', text);
+            
+            // Enhanced keyword-based detection including Tanglish offensive words
+            const offensiveWords = [
+                // English offensive words
+                'hate', 'stupid', 'idiot', 'fool', 'damn', 'shit', 'fuck', 'bitch', 'asshole',
+                'kill yourself', 'die', 'loser', 'retard', 'moron', 'dumb', 'ugly',
+                
+                // Tanglish/Tamil offensive words
+                'punda', 'poda', 'maire', 'kutta', 'saala', 'randi', 'kutti', 'thevdiya',
+                'oombu', 'naaye', 'paithiyam', 'loose', 'waste', 'useless da',
+                'poda patti', 'maire punda', 'thoo', 'chi chi',
+                
+                // Hindi/Urdu offensive words commonly used in Tanglish
+                'madarchod', 'behenchod', 'chutiya', 'gandu', 'randi', 'harami',
+                'kamina', 'kameena', 'badtameez', 'badword',
+                
+                // General offensive patterns
+                'offensive', 'hate speech', 'kill', 'murder', 'violence'
+            ];
+            
+            const lowerText = text.toLowerCase();
+            const isOffensive = offensiveWords.some(word => lowerText.includes(word));
+            
+            console.log('Simulated detection result:', { isOffensive, text: lowerText });
+            
+            return {
+                isOffensive: isOffensive,
+                confidence: 0.9,
+                prediction: isOffensive ? 'OFFENSIVE' : 'NOT_OFFENSIVE'
+            };
+        }
+
+        function handleViolation(username, type) {
+            if (!userViolations[username]) {
+                userViolations[username] = 0;
+            }
+            
+            userViolations[username]++;
+            localStorage.setItem('socialHubViolations', JSON.stringify(userViolations));
+
+            const violationCount = userViolations[username];
+            
+            if (violationCount >= 3) {
+                // Suspend the user
+                users[username].suspended = true;
+                localStorage.setItem('socialHubUsers', JSON.stringify(users));
+                
+                if (currentUser && currentUser.username === username) {
+                    currentUser.suspended = true;
+                    localStorage.setItem('socialHubCurrentUser', JSON.stringify(currentUser));
+                }
+                
+                showSuspensionModal(`Your account has been suspended due to repeated violations (${violationCount} violations). You can no longer post or comment.`);
+            } else {
+                const remainingAttempts = 3 - violationCount;
+                showSuspensionModal(`Your ${type} contains inappropriate content and has been blocked. You have ${remainingAttempts} attempt(s) remaining before your account is suspended.`);
+            }
+        }
+
+        function showSuspensionModal(message) {
+            document.getElementById('suspensionMessage').textContent = message;
+            showModal('suspensionModal');
+        }
+
+        async function handleAddComment(postId, commentText) {
+            if (!currentUser) {
+                showAlert('Please log in to comment', 'error');
+                return;
+            }
+
+            if (currentUser.suspended) {
+                showSuspensionModal('Your account is suspended. You cannot comment.');
+                return;
+            }
+
+            // Show loading spinner
+            document.getElementById('loadingSpinner').style.display = 'flex';
+
+            try {
+                // Check for hate speech in comment using Gradio client
+                const commentCheck = await checkHateSpeechGradio(commentText);
+
+                // Hide loading spinner
+                document.getElementById('loadingSpinner').style.display = 'none';
+
+                if (commentCheck.isOffensive) {
+                    handleViolation(currentUser.username, 'comment');
+                    return;
+                }
+
+                // Show success message for non-offensive content
+                console.log('Comment passed hate speech check:', commentCheck);
+
+                // Add the comment
+                const post = posts.find(p => p.id === postId);
+                if (post) {
+                    const newComment = {
+                        id: Date.now(),
+                        content: commentText,
+                        author: currentUser.username,
+                        timestamp: new Date().toISOString()
+                    };
+
+                    post.comments.push(newComment);
+                    localStorage.setItem('socialHubPosts', JSON.stringify(posts));
+                    displayPosts();
+                    showAlert('Comment added successfully!', 'success');
+                }
+
+            } catch (error) {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                console.error('Error checking hate speech:', error);
+                showAlert('Error processing your comment. Please try again.', 'error');
+            }
+        }
+
+        // Make functions globally available for event handlers
+        window.handleVote = function(postId, voteType) {
+            if (!currentUser) {
+                showAlert('Please log in to vote', 'error');
+                return;
+            }
+
+            const post = posts.find(p => p.id === postId);
+            if (!post) return;
+
+            const userVote = post.userVotes[currentUser.username];
+
+            // Remove previous vote if exists
+            if (userVote === 'up') {
+                post.upvotes--;
+            } else if (userVote === 'down') {
+                post.downvotes--;
+            }
+
+            // Add new vote if different from previous
+            if (userVote !== voteType) {
+                if (voteType === 'up') {
+                    post.upvotes++;
+                } else {
+                    post.downvotes++;
+                }
+                post.userVotes[currentUser.username] = voteType;
+            } else {
+                // Remove vote if clicking same button
+                delete post.userVotes[currentUser.username];
+            }
+
+            localStorage.setItem('socialHubPosts', JSON.stringify(posts));
+            displayPosts();
+        };
+
+        window.toggleComments = function(postId) {
+            const commentsSection = document.getElementById(`comments-${postId}`);
+            commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+        };
+
+        window.submitComment = async function(postId) {
+            const commentInput = document.getElementById(`comment-input-${postId}`);
+            const commentText = commentInput.value.trim();
+            
+            if (!commentText) {
+                showAlert('Please enter a comment', 'error');
+                return;
+            }
+
+            await handleAddComment(postId, commentText);
+            commentInput.value = '';
+        };
+
+        function displayPosts() {
+            const postsContainer = document.getElementById('postsContainer');
+            postsContainer.innerHTML = '';
+
+            if (posts.length === 0) {
+                postsContainer.innerHTML = `
+                    <div class="post-card">
+                        <div class="post-content">
+                            <h3>Welcome to SocialHub!</h3>
+                            <p>No posts yet. Be the first to share something!</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            posts.forEach(post => {
+                const postElement = createPostElement(post);
+                postsContainer.appendChild(postElement);
+            });
+        }
+
+        function createPostElement(post) {
+    const postDiv = document.createElement('div');
+    postDiv.className = 'post-card';
+    postDiv.dataset.postId = post.id;
+
+    // allow delete if author, admin, or moderator
+    const canDelete = currentUser &&
+        (currentUser.username === post.author ||
+         currentUser.username === 'admin' ||
+         currentUser.username === 'moderator' ||
+         (users[currentUser.username] && users[currentUser.username].role === 'moderator'));
+
+    // Generate media content HTML
+    let mediaHTML = '';
+    if (post.media) {
+        switch(post.media.type) {
+            case 'image':
+                mediaHTML = `
+                    <div class="post-media">
+                        <img src="${post.media.data}" alt="${post.media.filename}" class="post-image" onclick="openMediaModal('${post.media.data}', 'image')">
+                    </div>
+                `;
+                break;
+            case 'video':
+                mediaHTML = `
+                    <div class="post-media">
+                        <video src="${post.media.data}" controls class="post-video">
+                            Your browser does not support the video tag.
+                        </video>
+                        <div class="media-filename">${post.media.filename}</div>
+                    </div>
+                `;
+                break;
+            case 'audio':
+                mediaHTML = `
+                    <div class="post-media audio-media">
+                        <div class="audio-player">
+                            <i class="fas fa-music"></i>
+                            <span class="audio-filename">${post.media.filename}</span>
+                        </div>
+                        <audio src="${post.media.data}" controls class="post-audio">
+                            Your browser does not support the audio tag.
+                        </audio>
+                    </div>
+                `;
+                break;
+        }
+    }
+
+    postDiv.innerHTML = `
+        <div class="post-header">
+            <span class="post-author">u/${post.author}</span>
+            <span>•</span>
+            <span class="post-time">${formatTime(post.timestamp)}</span>
+        </div>
+        <div class="post-title">${escapeHtml(post.title)}</div>
+        ${post.content ? `<div class="post-content">${escapeHtml(post.content)}</div>` : ''}
+        ${mediaHTML}
+        <div class="post-actions">
+            <button class="action-btn vote-btn" onclick="handleVote(${post.id}, 'up')">
+                <i class="fas fa-arrow-up"></i>
+                <span>${post.upvotes}</span>
+            </button>
+            <button class="action-btn vote-btn" onclick="handleVote(${post.id}, 'down')">
+                <i class="fas fa-arrow-down"></i>
+                <span>${post.downvotes}</span>
+            </button>
+            <button class="action-btn" onclick="toggleComments(${post.id})">
+                <i class="fas fa-comment"></i>
+                <span>${post.comments.length} Comments</span>
+            </button>
+            <button class="action-btn">
+                <i class="fas fa-share"></i>
+                Share
+            </button>
+            ${canDelete ? `
+            <button class="action-btn delete-btn" onclick="deletePost(${post.id})" title="Delete">
+                <i class="fas fa-trash"></i>
+            </button>` : ''}
+        </div>
+
+        <!-- Comments Section -->
+        <div class="comments-section" id="comments-${post.id}" style="display: none;">
+            ${currentUser ? `
+                <div class="comment-form">
+                    <textarea placeholder="Add a comment..." id="comment-input-${post.id}"></textarea>
+                    <button class="btn-primary" onclick="submitComment(${post.id})" style="margin-top: 8px;">Comment</button>
+                </div>
+            ` : '<p style="color: #818384; font-size: 14px;">Please log in to comment</p>'}
+
+            <div id="comments-list-${post.id}">
+                ${post.comments.map(comment => `
+                    <div class="comment">
+                        <div class="comment-header">
+                            <span class="comment-author">u/${comment.author}</span>
+                            <span>•</span>
+                            <span>${formatTime(comment.timestamp)}</span>
+                        </div>
+                        <div class="comment-content">${escapeHtml(comment.content)}</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    return postDiv;
+}
+function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function deletePost(postId) {
+    const idx = posts.findIndex(p => p.id === postId);
+    if (idx === -1) {
+        showAlert("Post not found", "error");
+        return;
+    }
+
+    const post = posts[idx];
+
+    const isAuthor = currentUser && currentUser.username === post.author;
+    const isAdmin = currentUser && currentUser.username === "admin";
+    const isModerator = currentUser &&
+        (currentUser.username === "moderator" ||
+         (users[currentUser.username] && users[currentUser.username].role === "moderator"));
+
+    if (!isAuthor && !isAdmin && !isModerator) {
+        showAlert("You don’t have permission to delete this post", "error");
+        return;
+    }
+
+    if (!confirm("Delete this post permanently?")) return;
+
+    posts.splice(idx, 1);
+    localStorage.setItem("socialHubPosts", JSON.stringify(posts));
+    displayPosts(); // refresh list
+    showAlert("Post deleted successfully", "success");
+}
+
+        function formatTime(timestamp) {
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diffInMinutes = Math.floor((now - time) / (1000 * 60));
+
+            if (diffInMinutes < 1) return 'just now';
+            if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+            if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+            return `${Math.floor(diffInMinutes / 1440)}d ago`;
+        }
+
+        function handleSearch(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredPosts = posts.filter(post => 
+                post.title.toLowerCase().includes(searchTerm) ||
+                post.content.toLowerCase().includes(searchTerm) ||
+                post.author.toLowerCase().includes(searchTerm)
+            );
+            
+            displayFilteredPosts(filteredPosts);
+        }
+
+        function displayFilteredPosts(filteredPosts) {
+            const postsContainer = document.getElementById('postsContainer');
+            postsContainer.innerHTML = '';
+
+            if (filteredPosts.length === 0) {
+                postsContainer.innerHTML = `
+                    <div class="post-card">
+                        <div class="post-content">
+                            <p>No posts found matching your search.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            filteredPosts.forEach(post => {
+                const postElement = createPostElement(post);
+                postsContainer.appendChild(postElement);
+            });
+        }
+
+        function showAlert(message, type) {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i>
+                ${message}
+            `;
+
+            document.body.appendChild(alert);
+
+            // Position the alert
+            alert.style.position = 'fixed';
+            alert.style.top = '100px';
+            alert.style.right = '20px';
+            alert.style.zIndex = '9999';
+            alert.style.maxWidth = '400px';
+
+            // Remove alert after 5 seconds
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        function loadSampleData() {
+            // Only load sample data if no posts exist
+            if (posts.length === 0) {
+                posts = [
+                    {
+                        id: 1,
+                        title: "Welcome to SocialHub!",
+                        content: "This is a demo post to show how the platform works. Feel free to create your own posts and engage with the community!",
+                        author: "admin",
+                        timestamp: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+                        upvotes: 5,
+                        downvotes: 0,
+                        comments: [
+                            {
+                                id: 1,
+                                content: "Great platform! Looking forward to using it.",
+                                author: "user1",
+                                timestamp: new Date(Date.now() - 1800000).toISOString() // 30 minutes ago
+                            }
+                        ],
+                        userVotes: {}
+                    },
+                    {
+                        id: 2,
+                        title: "Community Guidelines",
+                        content: "Please be respectful to all members. Hate speech and offensive content will not be tolerated and may result in account suspension.",
+                        author: "moderator",
+                        timestamp: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
+                        upvotes: 12,
+                        downvotes: 1,
+                        comments: [],
+                        userVotes: {}
+                    }
+                ];
+
+                // Create sample users
+                users['admin'] = {
+                    username: 'admin',
+                    email: 'admin@socialhub.com',
+                    password: 'admin123',
+                    joinDate: new Date(Date.now() - 86400000).toISOString(),
+                    suspended: false
+                };
+
+                users['moderator'] = {
+                    username: 'moderator',
+                    email: 'mod@socialhub.com',
+                    password: 'mod123',
+                    joinDate: new Date(Date.now() - 86400000).toISOString(),
+                    suspended: false
+                };
+
+                users['user1'] = {
+                    username: 'user1',
+                    email: 'user1@example.com',
+                    password: 'user123',
+                    joinDate: new Date(Date.now() - 43200000).toISOString(),
+                    suspended: false
+                };
+
+                // Initialize violation counts
+                userViolations['admin'] = 0;
+                userViolations['moderator'] = 0;
+                userViolations['user1'] = 0;
+
+                // Save to localStorage
+                localStorage.setItem('socialHubPosts', JSON.stringify(posts));
+                localStorage.setItem('socialHubUsers', JSON.stringify(users));
+                localStorage.setItem('socialHubViolations', JSON.stringify(userViolations));
+            }
+        }
+        // Expose to global scope so inline onclick can find it
+window.deletePost = deletePost;
+
+    </script>
+
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            background-color: #1a1a1b;
+            border-bottom: 1px solid #343536;
+            padding: 12px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff4500;
+        }
+
+        .logo i {
+            margin-right: 8px;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px 40px 10px 16px;
+            border: 1px solid #343536;
+            border-radius: 20px;
+            background-color: #272729;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #ff4500;
+        }
+
+        .search-bar button {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #818384;
+            cursor: pointer;
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: #ff4500;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #e03d00;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: #ff4500;
+            border: 1px solid #ff4500;
+        }
+
+        .btn-secondary:hover {
+            background-color: #ff4500;
+            color: white;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-menu span {
+            color: #ff4500;
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 80px;
+            padding: 20px 0;
+        }
+
+        .main-content .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .create-post-card {
+            background-color: #1a1a1b;
+            border: 1px solid #343536;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .create-post-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #272729;
+            border: 1px solid #343536;
+            border-radius: 6px;
+            color: #818384;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .create-post-btn:hover {
+            background-color: #343536;
+            color: #ffffff;
+        }
+
+        .community-info {
+            background-color: #1a1a1b;
+            border: 1px solid #343536;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .community-info h3 {
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        .community-info ul {
+            list-style: none;
+        }
+
+        .community-info li {
+            padding: 8px 0;
+            color: #818384;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s ease;
+        }
+
+        .community-info li:hover {
+            color: #ffffff;
+        }
+
+        /* Posts Feed */
+        .posts-feed {
+            background-color: #1a1a1b;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .sort-options {
+            display: flex;
+            background-color: #272729;
+            border-bottom: 1px solid #343536;
+        }
+
+        .sort-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            color: #818384;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .sort-btn.active,
+        .sort-btn:hover {
+            color: #ffffff;
+            background-color: #343536;
+        }
+
+        /* Post Card */
+        .post-card {
+            background-color: #1a1a1b;
+            border-bottom: 1px solid #343536;
+            padding: 16px;
+            transition: background-color 0.2s ease;
+        }
+
+        .post-card:hover {
+            background-color: #272729;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #818384;
+        }
+
+        .post-author {
+            color: #ff4500;
+            font-weight: 500;
+            margin-right: 8px;
+        }
+
+        .post-time {
+            margin-left: 8px;
+        }
+
+        .post-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        .post-content {
+            color: #d7dadc;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .post-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            color: #818384;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background-color: #343536;
+            color: #ffffff;
+        }
+
+        .action-btn.upvoted {
+            color: #ff4500;
+        }
+
+        .action-btn.downvoted {
+            color: #7193ff;
+        }
+
+        /* Comments */
+        .comments-section {
+            margin-top: 16px;
+            border-top: 1px solid #343536;
+            padding-top: 16px;
+        }
+
+        .comment {
+            margin-bottom: 12px;
+            padding-left: 16px;
+            border-left: 2px solid #343536;
+        }
+
+        .comment-header {
+            font-size: 12px;
+            color: #818384;
+            margin-bottom: 4px;
+        }
+
+        .comment-author {
+            color: #ff4500;
+            font-weight: 500;
+        }
+
+        .comment-content {
+            color: #d7dadc;
+            font-size: 14px;
+        }
+
+        .comment-form {
+            margin-top: 12px;
+        }
+
+        .comment-form textarea {
+            width: 100%;
+            padding: 8px;
+            background-color: #272729;
+            border: 1px solid #343536;
+            border-radius: 4px;
+            color: #ffffff;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .comment-form textarea:focus {
+            outline: none;
+            border-color: #ff4500;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+            background-color: #1a1a1b;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #343536;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .modal-content.warning {
+            border-color: #ff4500;
+        }
+
+        .close {
+            color: #818384;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 10px;
+        }
+
+        .close:hover {
+            color: #ffffff;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .modal form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .modal input,
+        .modal textarea {
+            padding: 12px;
+            border: 1px solid #343536;
+            border-radius: 4px;
+            background-color: #272729;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .modal input:focus,
+        .modal textarea:focus {
+            outline: none;
+            border-color: #ff4500;
+        }
+
+        .modal textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+
+        .spinner {
+            border: 4px solid #343536;
+            border-top: 4px solid #ff4500;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content .container {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .sidebar {
+                position: static;
+                order: 2;
+            }
+            
+            .header .container {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .search-bar {
+                order: 3;
+                margin: 0;
+                max-width: none;
+            }
+            
+            .user-actions {
+                order: 2;
+            }
+            
+            .main-content {
+                margin-top: 140px;
+            }
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .alert-warning {
+            background-color: rgba(255, 69, 0, 0.1);
+            border: 1px solid #ff4500;
+            color: #ff4500;
+        }
+
+        .alert-error {
+            background-color: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+
+        .alert-success {
+            background-color: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+        .action-btn.delete-btn {
+    color: #ff6b6b;
+}
+.action-btn.delete-btn:hover {
+    background-color: #3b2b2b;
+    color: #ff6b6b;
+}
+
+        /* Media Upload Styles */
+        .media-upload-section {
+            margin: 16px 0;
+            padding: 16px;
+            background-color: #272729;
+            border: 1px solid #343536;
+            border-radius: 8px;
+        }
+
+        .media-upload-section h3 {
+            margin-bottom: 12px;
+            color: #ffffff;
+            font-size: 16px;
+        }
+
+        .media-options {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .media-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background-color: #343536;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: #d7dadc;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .media-btn:hover {
+            background-color: #ff4500;
+            color: white;
+            border-color: #ff4500;
+        }
+
+        .media-btn i {
+            font-size: 16px;
+        }
+
+        /* Audio Recording Styles */
+        .audio-recording {
+            margin-top: 12px;
+            padding: 12px;
+            background-color: #1a1a1b;
+            border: 1px solid #343536;
+            border-radius: 6px;
+        }
+
+        .recording-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .record-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background-color: #ff4500;
+            border: none;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .record-btn:hover {
+            background-color: #e03d00;
+        }
+
+        .record-btn i {
+            font-size: 14px;
+        }
+
+        #recordingTime {
+            font-family: 'Courier New', monospace;
+            color: #ff4500;
+            font-weight: bold;
+        }
+
+        /* Media Preview Styles */
+        .media-preview {
+            margin-top: 12px;
+            display: none;
+        }
+
+        .media-item {
+            background-color: #1a1a1b;
+            border: 1px solid #343536;
+            border-radius: 8px;
+            padding: 12px;
+            position: relative;
+        }
+
+        .media-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .filename {
+            color: #d7dadc;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .remove-media {
+            background-color: #ff4500;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .remove-media:hover {
+            background-color: #e03d00;
+        }
+
+        .audio-preview {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .audio-preview i {
+            color: #ff4500;
+            font-size: 20px;
+        }
+
+        /* Post Media Styles */
+        .post-media {
+            margin: 12px 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .post-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .post-image:hover {
+            opacity: 0.9;
+        }
+
+        .post-video {
+            width: 100%;
+            max-height: 400px;
+            background-color: #000;
+        }
+
+        .post-audio {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .audio-media {
+            background-color: #272729;
+            padding: 12px;
+            border: 1px solid #343536;
+        }
+
+        .audio-player {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .audio-player i {
+            color: #ff4500;
+            font-size: 18px;
+        }
+
+        .audio-filename {
+            color: #d7dadc;
+            font-weight: 500;
+        }
+
+        .media-filename {
+            padding: 8px 12px;
+            background-color: #1a1a1b;
+            color: #818384;
+            font-size: 12px;
+            border-top: 1px solid #343536;
+        }
+
+        /* Media Modal Styles */
+        .media-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            cursor: pointer;
+        }
+
+        .media-modal-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+            cursor: default;
+        }
+
+        .close-media-modal {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .close-media-modal:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Responsive Media Styles */
+        @media (max-width: 768px) {
+            .media-options {
+                flex-direction: column;
+            }
+            
+            .media-btn {
+                justify-content: center;
+            }
+            
+            .recording-controls {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .post-image,
+            .post-video {
+                max-height: 250px;
+            }
+        }
+
+    </style>
